@@ -1,0 +1,47 @@
+# Development files
+.env
+.env.local
+.env.*.local
+.vscode/
+.idea/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Node modules
+node_modules/
+
+# Development dependencies
+nodemon.json
+
+# Test files
+test/
+tests/
+*.test.js
+*.spec.js
+
+# Documentation drafts
+docs/
+CONTRIBUTING.md
+
+# Git files
+.git/
+.gitignore
+
+# Other
+coverage/
+.nyc_output/
+dist/
+build/
+temp/
+tmp/

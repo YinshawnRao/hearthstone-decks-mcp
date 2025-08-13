@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>炉石传说卡组MCP服务器测试</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding: 25px;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            background: #fafafa;
+        }
+
+        .section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 600px;
+            overflow-y: auto;
+            line-height: 1.4;
+        }
+
+        .deck-display {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .deck-meta {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .deck-meta h3 {
+            margin: 0 0 10px 0;
+            font-size: 1.3rem;
+        }
+
+        .deck-meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            font-size: 0.9rem;
+        }
+
+        .deck-meta-item {
+            background: rgba(255,255,255,0.1);
+            padding: 8px 12px;
+            border-radius: 4px;
+        }
+
+        .cards-section {
+            margin-top: 20px;
+        }
+
+        .cards-section h4 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .card-list {
+            display: grid;
+            gap: 8px;
+        }
+
+        .card-entry {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 3px solid #667eea;
+        }
+
+        .card-entry img {
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            margin-right: 12px;
+            object-fit: cover;
+        }
+
+        .card-info {
+            flex: 1;
+        }
+
+        .card-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 2px;
+        }
+
+        .card-details {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .card-count {
+            background: #667eea;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            min-width: 24px;
+            text-align: center;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .stat-card h5 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+        .mana-curve {
+            display: flex;
+            align-items: end;
+            gap: 4px;
+            height: 80px;
+            margin-top: 10px;
+        }
+
+        .mana-bar {
+            background: linear-gradient(to top, #667eea, #764ba2);
+            border-radius: 2px 2px 0 0;
+            min-width: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: end;
+            align-items: center;
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .mana-label {
+            background: #333;
+            color: white;
+            padding: 2px 4px;
+            font-size: 9px;
+            margin-top: 4px;
+            border-radius: 2px;
+        }
+
+        .error {
+            border-left-color: #e74c3c;
+            background: #fdf2f2;
+        }
+
+        .success {
+            border-left-color: #27ae60;
+            background: #f2fdf2;
+        }
+
+        .connection-status {
+            padding: 10px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .connection-status.connected {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .connection-status.disconnected {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .examples {
+            background: #e8f4fd;
+            border: 1px solid #bee5eb;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .examples h4 {
+            color: #0c5460;
+            margin-bottom: 10px;
+        }
+
+        .examples code {
+            background: rgba(255,255,255,0.8);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .card-item {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .card-item img {
+            width: 100%;
+            max-width: 150px;
+            height: auto;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+
+        .card-item h5 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .card-item p {
+            color: #666;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🐉 炉石传说卡组MCP服务器</h1>
+            <p>解析卡组代码，获取详细卡牌信息</p>
+        </div>
+
+        <div class="content">
+            <!-- 连接状态 -->
+            <div id="connection-status" class="connection-status disconnected">
+                📡 连接状态：断开连接
+            </div>
+
+            <!-- 卡组代码解析 -->
+            <div class="section">
+                <h2>🎯 卡组代码解析</h2>
+                
+                <div class="examples">
+                    <h4>示例卡组代码：</h4>
+                    <p>标准模式：<code>AAECAZ8FBugE7QXUBfcF4gXtBQwBAfcC5wP5A/4D5wWJBpkH4wfXCOsE7QX3BQAA</code></p>
+                    <p>狂野模式：<code>AAECAf0EBMABnALtBZYF4gW/CAMB7wLFBJYGiA/WEcMWjQjJxwIA</code></p>
+                </div>
+
+                <div class="form-group">
+                    <label for="deckCode">卡组代码：</label>
+                    <textarea id="deckCode" placeholder="请输入炉石传说卡组代码..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="includeStats" checked> 包含统计信息
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="showPretty" checked> 美化显示（取消勾选查看原始JSON）
+                    </label>
+                </div>
+
+                <button onclick="parseDeckCode()">🔍 解析卡组</button>
+
+                <div id="deckResult" class="result" style="display: none;"></div>
+            </div>
+
+            <!-- 卡牌搜索 -->
+            <div class="section">
+                <h2>🔍 卡牌搜索</h2>
+                
+                <div class="examples">
+                    <h4>搜索示例：</h4>
+                    <p>按名称搜索：<code>火球术</code>、<code>法师</code>、<code>龙</code></p>
+                </div>
+
+                <div class="form-group">
+                    <label for="cardName">卡牌名称：</label>
+                    <input type="text" id="cardName" placeholder="请输入要搜索的卡牌名称...">
+                </div>
+
+                <div class="form-group">
+                    <label for="searchLimit">返回数量限制：</label>
+                    <input type="number" id="searchLimit" value="10" min="1" max="50">
+                </div>
+
+                <button onclick="searchCards()">🔍 搜索卡牌</button>
+
+                <div id="searchResult" class="result" style="display: none;"></div>
+            </div>
+
+            <!-- 卡牌详情 -->
+            <div class="section">
+                <h2>📋 卡牌详情</h2>
+                
+                <div class="examples">
+                    <h4>卡牌ID示例：</h4>
+                    <p>经典卡牌：<code>CS2_029</code>（火球术）</p>
+                    <p>传说卡牌：<code>EX1_572</code>（伊利丹·怒风）</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="cardId">卡牌ID：</label>
+                    <input type="text" id="cardId" placeholder="请输入卡牌ID...">
+                </div>
+
+                <button onclick="getCardInfo()">📋 获取详情</button>
+
+                <div id="cardResult" class="result" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let eventSource;
+
+        // 连接SSE
+        function connectSSE() {
+            eventSource = new EventSource('/sse');
+            
+            eventSource.onopen = function() {
+                updateConnectionStatus(true);
+            };
+
+            eventSource.onmessage = function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    console.log('SSE消息:', data);
+                    
+                    if (data.type === 'connection') {
+                        console.log('连接成功:', data.message);
+                    }
+                } catch (error) {
+                    console.error('解析SSE消息错误:', error);
+                }
+            };
+
+            eventSource.onerror = function() {
+                updateConnectionStatus(false);
+                // 尝试重连
+                setTimeout(connectSSE, 3000);
+            };
+        }
+
+        // 更新连接状态
+        function updateConnectionStatus(connected) {
+            const statusElement = document.getElementById('connection-status');
+            if (connected) {
+                statusElement.className = 'connection-status connected';
+                statusElement.textContent = '📡 连接状态：已连接';
+            } else {
+                statusElement.className = 'connection-status disconnected';
+                statusElement.textContent = '📡 连接状态：断开连接';
+            }
+        }
+
+        // 解析卡组代码
+        async function parseDeckCode() {
+            const deckCode = document.getElementById('deckCode').value.trim();
+            const includeStats = document.getElementById('includeStats').checked;
+            const showPretty = document.getElementById('showPretty').checked;
+            
+            if (!deckCode) {
+                showResult('deckResult', '请输入卡组代码', true);
+                return;
+            }
+
+            try {
+                const response = await fetch('/tools/parse_deck_code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ deckCode, includeStats })
+                });
+
+                const result = await response.json();
+                
+                if (result.success && result.content && result.content[0]) {
+                    const data = JSON.parse(result.content[0].text);
+                    if (data.success && data.data) {
+                        if (showPretty) {
+                            // 显示格式化的卡组信息
+                            showDeckDisplay('deckResult', data.data);
+                        } else {
+                            // 显示原始JSON（只显示卡组数据，不包含外层包装）
+                            showResult('deckResult', JSON.stringify(data.data, null, 2), false);
+                        }
+                    } else {
+                        showResult('deckResult', JSON.stringify(data, null, 2), true);
+                    }
+                } else {
+                    showResult('deckResult', JSON.stringify(result, null, 2), true);
+                }
+            } catch (error) {
+                showResult('deckResult', `错误: ${error.message}`, true);
+            }
+        }
+
+        // 搜索卡牌
+        async function searchCards() {
+            const cardName = document.getElementById('cardName').value.trim();
+            const limit = parseInt(document.getElementById('searchLimit').value);
+            
+            if (!cardName) {
+                showResult('searchResult', '请输入卡牌名称', true);
+                return;
+            }
+
+            try {
+                const response = await fetch('/tools/search_cards', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ cardName, limit })
+                });
+
+                const result = await response.json();
+                
+                if (result.success && result.content && result.content[0]) {
+                    const data = JSON.parse(result.content[0].text);
+                    if (data.success && data.data && data.data.cards) {
+                        showCardsGrid('searchResult', data.data.cards, `搜索"${cardName}"的结果`);
+                    } else {
+                        showResult('searchResult', JSON.stringify(data, null, 2), true);
+                    }
+                } else {
+                    showResult('searchResult', JSON.stringify(result, null, 2), true);
+                }
+            } catch (error) {
+                showResult('searchResult', `错误: ${error.message}`, true);
+            }
+        }
+
+        // 获取卡牌详情
+        async function getCardInfo() {
+            const cardId = document.getElementById('cardId').value.trim();
+            
+            if (!cardId) {
+                showResult('cardResult', '请输入卡牌ID', true);
+                return;
+            }
+
+            try {
+                const response = await fetch('/tools/get_card_info', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ cardId })
+                });
+
+                const result = await response.json();
+                
+                if (result.success && result.content && result.content[0]) {
+                    const data = JSON.parse(result.content[0].text);
+                    if (data.success && data.data) {
+                        showCardsGrid('cardResult', [data.data], `卡牌详情: ${cardId}`);
+                    } else {
+                        showResult('cardResult', JSON.stringify(data, null, 2), true);
+                    }
+                } else {
+                    showResult('cardResult', JSON.stringify(result, null, 2), true);
+                }
+            } catch (error) {
+                showResult('cardResult', `错误: ${error.message}`, true);
+            }
+        }
+
+        // 显示结果
+        function showResult(elementId, content, isError = false) {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            element.innerHTML = '';
+            element.className = `result ${isError ? 'error' : 'success'}`;
+            
+            const pre = document.createElement('pre');
+            pre.textContent = content;
+            element.appendChild(pre);
+        }
+
+        // 显示格式化的卡组信息
+        function showDeckDisplay(elementId, deckData) {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            element.className = 'result success';
+            element.innerHTML = '';
+
+            const deckDisplay = document.createElement('div');
+            deckDisplay.className = 'deck-display';
+
+            // 卡组元数据
+            const metaDiv = document.createElement('div');
+            metaDiv.className = 'deck-meta';
+            metaDiv.innerHTML = `
+                <h3>🐉 卡组信息</h3>
+                <div class="deck-meta-grid">
+                    <div class="deck-meta-item">
+                        <strong>格式:</strong> ${deckData.meta.format}
+                    </div>
+                    <div class="deck-meta-item">
+                        <strong>版本:</strong> ${deckData.meta.version}
+                    </div>
+                    <div class="deck-meta-item">
+                        <strong>总卡牌:</strong> ${deckData.meta.totalCards}
+                    </div>
+                    <div class="deck-meta-item">
+                        <strong>英雄:</strong> ${deckData.heroes.map(h => h.name).join(', ')}
+                    </div>
+                </div>
+            `;
+            deckDisplay.appendChild(metaDiv);
+
+            // 卡牌列表
+            if (deckData.cards && deckData.cards.length > 0) {
+                const cardsSection = document.createElement('div');
+                cardsSection.className = 'cards-section';
+                cardsSection.innerHTML = `<h4>🎴 卡牌列表 (${deckData.cards.length} 种卡牌)</h4>`;
+
+                const cardList = document.createElement('div');
+                cardList.className = 'card-list';
+
+                // 按费用排序卡牌
+                const sortedCards = [...deckData.cards].sort((a, b) => {
+                    const costA = a.cost || 0;
+                    const costB = b.cost || 0;
+                    if (costA !== costB) return costA - costB;
+                    return (a.name || '').localeCompare(b.name || '');
+                });
+
+                sortedCards.forEach(card => {
+                    const cardEntry = document.createElement('div');
+                    cardEntry.className = 'card-entry';
+
+                    const rarity = card.rarity || 'COMMON';
+                    const rarityColors = {
+                        'COMMON': '#95a5a6',
+                        'RARE': '#3498db',
+                        'EPIC': '#9b59b6',
+                        'LEGENDARY': '#f39c12'
+                    };
+
+                    cardEntry.innerHTML = `
+                        <img src="${card.imageUrl}" alt="${card.name}" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjZjhmOWZhIi8+CjxwYXRoIGQ9Ik0yMCAxMkMyMCAxMS40NDc3IDIwLjQ0NzcgMTEgMjEgMTFIMjlDMjkuNTUyMyAxMSAzMCAxMS40NDc3IDMwIDEyVjI4QzMwIDI4LjU1MjMgMjkuNTUyMyAyOSAyOSAyOUgyMUMyMC40NDc3IDI5IDIwIDI4LjU1MjMgMjAgMjhWMTJaIiBmaWxsPSIjZGRkIi8+CjxwYXRoIGQ9Ik0xMCAxNEMxMCAxMy40NDc3IDEwLjQ0NzcgMTMgMTEgMTNIMTlDMTkuNTUyMyAxMyAyMCAxMy40NDc3IDIwIDE0VjI2QzIwIDI2LjU1MjMgMTkuNTUyMyAyNyAxOSAyN0gxMUMxMC40NDc3IDI3IDEwIDI2LjU1MjMgMTAgMjZWMTRaIiBmaWxsPSIjYmJiIi8+Cjx0ZXh0IHg9IjIwIiB5PSIzNCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEwIiBmaWxsPSIjNjY2IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj7ljaHniYc8L3RleHQ+Cjwvc3ZnPgo='">
+                        <div class="card-info">
+                            <div class="card-name" style="color: ${rarityColors[rarity]}">${card.name || '未知卡牌'}</div>
+                            <div class="card-details">
+                                费用: ${card.cost || 0} | 
+                                ${card.cardClass || '中性'} | 
+                                ${card.type || '未知'} | 
+                                ${rarity}
+                                ${card.attack !== undefined ? ` | 攻击: ${card.attack}` : ''}
+                                ${card.health !== undefined ? ` | 生命值: ${card.health}` : ''}
+                            </div>
+                        </div>
+                        <div class="card-count">${card.count}</div>
+                    `;
+
+                    cardList.appendChild(cardEntry);
+                });
+
+                cardsSection.appendChild(cardList);
+                deckDisplay.appendChild(cardsSection);
+            }
+
+            // 统计信息
+            if (deckData.statistics) {
+                const statsSection = document.createElement('div');
+                statsSection.className = 'cards-section';
+                statsSection.innerHTML = '<h4>📊 卡组统计</h4>';
+
+                const statsGrid = document.createElement('div');
+                statsGrid.className = 'stats-grid';
+
+                // 法力值曲线
+                if (deckData.statistics.manaCurve) {
+                    const manaCard = document.createElement('div');
+                    manaCard.className = 'stat-card';
+                    manaCard.innerHTML = '<h5>法力值曲线</h5>';
+
+                    const manaCurve = document.createElement('div');
+                    manaCurve.className = 'mana-curve';
+
+                    const maxValue = Math.max(...deckData.statistics.manaCurve);
+                    deckData.statistics.manaCurve.forEach((count, cost) => {
+                        const bar = document.createElement('div');
+                        bar.className = 'mana-bar';
+                        const height = maxValue > 0 ? (count / maxValue) * 60 : 0;
+                        bar.style.height = `${height}px`;
+                        bar.innerHTML = `${count}<div class="mana-label">${cost >= 10 ? '10+' : cost}</div>`;
+                        manaCurve.appendChild(bar);
+                    });
+
+                    manaCard.appendChild(manaCurve);
+                    statsGrid.appendChild(manaCard);
+                }
+
+                // 稀有度分布
+                if (deckData.statistics.rarities) {
+                    const rarityCard = document.createElement('div');
+                    rarityCard.className = 'stat-card';
+                    rarityCard.innerHTML = '<h5>稀有度分布</h5>';
+                    
+                    const rarityList = Object.entries(deckData.statistics.rarities)
+                        .map(([rarity, count]) => `<div>${rarity}: ${count}</div>`)
+                        .join('');
+                    rarityCard.innerHTML += rarityList;
+                    
+                    statsGrid.appendChild(rarityCard);
+                }
+
+                // 卡牌类型分布
+                if (deckData.statistics.cardTypes) {
+                    const typeCard = document.createElement('div');
+                    typeCard.className = 'stat-card';
+                    typeCard.innerHTML = '<h5>卡牌类型</h5>';
+                    
+                    const typeList = Object.entries(deckData.statistics.cardTypes)
+                        .map(([type, count]) => `<div>${type}: ${count}</div>`)
+                        .join('');
+                    typeCard.innerHTML += typeList;
+                    
+                    statsGrid.appendChild(typeCard);
+                }
+
+                statsSection.appendChild(statsGrid);
+                deckDisplay.appendChild(statsSection);
+            }
+
+            element.appendChild(deckDisplay);
+        }
+
+        // 显示卡牌网格
+        function showCardsGrid(elementId, cards, title) {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            element.className = 'result success';
+            element.innerHTML = '';
+
+            const gridDisplay = document.createElement('div');
+            gridDisplay.className = 'deck-display';
+
+            // 标题
+            const titleDiv = document.createElement('div');
+            titleDiv.className = 'deck-meta';
+            titleDiv.innerHTML = `<h3>🔍 ${title}</h3><p>找到 ${cards.length} 张卡牌</p>`;
+            gridDisplay.appendChild(titleDiv);
+
+            // 卡牌网格
+            const cardsGrid = document.createElement('div');
+            cardsGrid.className = 'card-grid';
+
+            cards.forEach(card => {
+                const cardItem = document.createElement('div');
+                cardItem.className = 'card-item';
+
+                const rarity = card.rarity || 'COMMON';
+                const rarityColors = {
+                    'COMMON': '#95a5a6',
+                    'RARE': '#3498db', 
+                    'EPIC': '#9b59b6',
+                    'LEGENDARY': '#f39c12'
+                };
+
+                cardItem.innerHTML = `
+                    <img src="${card.imageUrl}" alt="${card.name}" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgdmlld0JveD0iMCAwIDE1MCAxNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxNTAiIGhlaWdodD0iMTUwIiBmaWxsPSIjZjhmOWZhIi8+CjxwYXRoIGQ9Ik03NSA0NEM3NSA0MS43OTA5IDc2Ljc5MDkgNDAgNzkgNDBIMTExQzExMy4yMDkgNDAgMTE1IDQxLjc5MDkgMTE1IDQ0VjEwNkMxMTUgMTA4LjIwOSAxMTMuMjA5IDExMCAxMTEgMTEwSDc5Qzc2Ljc5MDkgMTEwIDc1IDEwOC4yMDkgNzUgMTA2VjQ0WiIgZmlsbD0iI2RkZCIvPgo8cGF0aCBkPSJNMzUgNTJDMzUgNDkuNzkwOSAzNi43OTA5IDQ4IDM5IDQ4SDcxQzczLjIwOTEgNDggNzUgNDkuNzkwOSA3NSA1MlY5OEM3NSAxMDAuMjA5IDczLjIwOTEgMTAyIDcxIDEwMkgzOUMzNi43OTA5IDEwMiAzNSAxMDAuMjA5IDM1IDk4VjUyWiIgZmlsbD0iI2JiYiIvPgo8dGV4dCB4PSI3NSIgeT0iMTMwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM2NjYiIHRleHQtYW5jaG9yPSJtaWRkbGUiPuWNoeeJhzwvdGV4dD4KPC9zdmc+Cg=='">
+                    <h5 style="color: ${rarityColors[rarity]}">${card.name || '未知卡牌'}</h5>
+                    <p>费用: ${card.cost || 0}</p>
+                    <p>${card.cardClass || '中性'}</p>
+                    <p>${card.type || '未知'} | ${rarity}</p>
+                    ${card.attack !== undefined ? `<p>攻击: ${card.attack}</p>` : ''}
+                    ${card.health !== undefined ? `<p>生命值: ${card.health}</p>` : ''}
+                    ${card.text ? `<p style="font-size: 11px; margin-top: 8px; color: #666;">${card.text}</p>` : ''}
+                `;
+
+                cardsGrid.appendChild(cardItem);
+            });
+
+            gridDisplay.appendChild(cardsGrid);
+            element.appendChild(gridDisplay);
+        }
+
+        // 页面加载时连接SSE
+        window.onload = function() {
+            connectSSE();
+        };
+
+        // 页面关闭时断开SSE连接
+        window.onbeforeunload = function() {
+            if (eventSource) {
+                eventSource.close();
+            }
+        };
+    </script>
+</body>
+</html>

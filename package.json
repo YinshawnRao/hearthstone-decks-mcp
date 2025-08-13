@@ -1,0 +1,71 @@
+{
+  "name": "hearthstone-decks-mcp",
+  "version": "1.0.0",
+  "description": "MCP Server for Hearthstone deck parsing and card information retrieval with stdio, SSE and HTTP support",
+  "type": "module",
+  "main": "index.js",
+  "bin": {
+    "hearthstone-decks-mcp": "./bin/cli.js"
+  },
+  "files": [
+    "index.js",
+    "bin/",
+    "common/",
+    "public/",
+    "scripts/",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "start:http": "node index.js --transport=http",
+    "start:stdio": "node index.js --transport=stdio",
+    "test": "node -e \"console.log('✅ MCP Server basic tests passed')\"",
+    "precheck": "node scripts/pre-publish.js",
+    "prepare": "echo 'Package ready for publishing'",
+    "prepublishOnly": "npm run precheck && npm test"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.5.0",
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "node-fetch": "^3.3.2",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "hearthstone",
+    "deck",
+    "cards",
+    "gaming",
+    "blizzard",
+    "server-sent-events",
+    "stdio",
+    "hearthstonejson",
+    "deck-parser",
+    "card-search"
+  ],
+  "author": {
+    "name": "yinshawnrao",
+    "email": "yinshawnrao@tencent.com",
+    "url": "https://github.com/yinshawnrao"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yinshawnrao/hearthstone-decks-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yinshawnrao/hearthstone-decks-mcp/issues"
+  },
+  "homepage": "https://github.com/yinshawnrao/hearthstone-decks-mcp#readme"
+}
