@@ -1,6 +1,6 @@
 {
   "name": "hearthstone-decks-mcp",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "MCP Server for Hearthstone deck parsing and card information retrieval with stdio, SSE and HTTP support",
   "type": "module",
   "main": "index.js",
